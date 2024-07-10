@@ -1,0 +1,36 @@
+package views
+
+import (
+    "github.com/cterence/dead-drop/views/components"
+)
+
+templ Index() {
+    <!DOCTYPE html>
+    <html lang="en">
+        @components.Header()
+        <div>Copy the data that you wish to encrypt :</div>
+        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="data" type="text" placeholder="Secret data..." />
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="encrypt();">
+          Encrypt
+        </button>
+        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="encrypted-data" type="text" placeholder="Secret data..." />
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="decrypt();">
+          Decrypt
+        </button>
+        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="decrypted-data" type="text" placeholder="Secret data..." />
+        <script>
+          function encrypt() {
+            const data = document.getElementById("data").value
+            const encryptedData = sjcl.encrypt("password", data)
+            document.getElementById("encrypted-data").value = encryptedData
+          }
+
+          function decrypt() {
+            const data = document.getElementById("encrypted-data").value
+            const decryptedData = sjcl.decrypt("password", data)
+            document.getElementById("decrypted-data").value = decryptedData
+          }
+        </script>
+        @components.Footer()
+    </html>
+}
