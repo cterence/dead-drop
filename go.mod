@@ -3,7 +3,7 @@ module github.com/cterence/dead-drop
 go 1.22.3
 
 require (
-	github.com/a-h/templ v0.2.731
+	github.com/a-h/templ v0.2.747
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240711072234-6d998acd081f
 )
 
