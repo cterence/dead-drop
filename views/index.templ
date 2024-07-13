@@ -1,36 +1,65 @@
 package views
 
-import (
-    "github.com/cterence/dead-drop/views/components"
-)
+import "github.com/cterence/dead-drop/views/components"
 
 templ Index() {
-    <!DOCTYPE html>
-    <html lang="en">
-        @components.Header()
-        <div>Copy the data that you wish to encrypt :</div>
-        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="data" type="text" placeholder="Secret data..." />
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="encrypt();">
-          Encrypt
-        </button>
-        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="encrypted-data" type="text" placeholder="Secret data..." />
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="decrypt();">
-          Decrypt
-        </button>
-        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="decrypted-data" type="text" placeholder="Secret data..." />
-        <script>
-          function encrypt() {
-            const data = document.getElementById("data").value
-            const encryptedData = sjcl.encrypt("password", data)
-            document.getElementById("encrypted-data").value = encryptedData
+	<!DOCTYPE html>
+	<html lang="en" class="text-gray-900 antialiased leading-tight">
+		@components.Header()
+		<body class="min-h-screen bg-gray-100 p-4">
+			<div class="md:container md:mx-auto">
+				@components.Title()
+				<h2 class="text-xl my-4 text-gray-600">copy the data that you wish to share securely.</h2>
+				<div id="link-wrapper" class="flex items-center my-6 overflow-x-hidden text-gray-600 hidden select-none">link: <span id="link" class="truncate select-all shadow appearance-none border rounded w-full py-2 px-3 ml-2 text-gray-700 bg-white leading-tight focus:outline-none focus:shadow-outline"></span></div>
+				<div id="key-wrapper" class="flex items-center my-6 text-gray-600 hidden select-none">password: <span id="key" class="truncate select-all shadow appearance-none border rounded w-full py-2 px-3 ml-2 text-gray-700 bg-white leading-tight focus:outline-none focus:shadow-outline"></span></div>
+				<form>
+					<textarea class="transition-opacity duration-500 font-mono shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-36" id="data" type="text" placeholder="secret data."></textarea>
+					<input name="data" class="hidden" id="encrypted-data" type="text"/>
+					<button id="make-drop" class="transition-opacity duration-500 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline my-4" type="button" hx-on::after-request="cleanup()" hx-post="/drop/put" hx-trigger="click" hx-swap="innerHTML" hx-target="#link">
+						make drop.
+					</button>
+				</form>
+			</div>
+			<script>
+					function dec2b32(dec) {
+						return dec.toString(32).padStart(2, "0")
+					}
+
+					function generateId(len) {
+						var arr = new Uint8Array((len || 40) / 2)
+						window.crypto.getRandomValues(arr)
+						return Array.from(arr, dec2b32).join('')
+					}
+
+        	function encrypt() {
+						const data = document.getElementById("data").value
+						const key = generateId(32)
+            const encryptedData = sjcl.encrypt(key, data)
+						document.getElementById("encrypted-data").value = encryptedData
+						console.log(encryptedData, key)
+						document.getElementById("key").innerHTML = key
           }
 
-          function decrypt() {
-            const data = document.getElementById("encrypted-data").value
-            const decryptedData = sjcl.decrypt("password", data)
-            document.getElementById("decrypted-data").value = decryptedData
-          }
+					htmx.on("htmx:confirm", (e) => {
+						e.preventDefault()
+						encrypt()
+						e.detail.issueRequest()
+					})
+
+          function cleanup() {
+						const dataElement = document.getElementById("data")
+						const keyElement = document.getElementById("key-wrapper")
+						const linkElement = document.getElementById("link-wrapper")
+						dataElement.classList.add("opacity-0")
+						document.getElementById("make-drop").classList.add("opacity-0")
+						// timeout to allow the opacity transition to complete
+						setTimeout(() => {
+							linkElement.classList.remove("hidden")
+							keyElement.classList.remove("hidden")
+						}, 500)
+					}
         </script>
-        @components.Footer()
-    </html>
+			@components.Footer()
+		</body>
+	</html>
 }

@@ -1,0 +1,55 @@
+package views
+
+import "github.com/cterence/dead-drop/views/components"
+
+templ GetDrop() {
+	<!DOCTYPE html>
+	<html lang="en" class="text-gray-900 antialiased leading-tight">
+		@components.Header()
+		<body class="min-h-screen bg-gray-100 p-4">
+			<div class="md:container md:mx-auto">
+				@components.Title()
+				<h2 class="text-xl my-4 text-gray-600">enter the password to retrieve your drop.</h2>
+				<form>
+					<input class="transition-opacity duration-500 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="key" type="password" placeholder="password."/>
+					<button id="getDataButton" class="transition-opacity duration-500 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline my-4" type="button" hx-trigger="click" hx-swap="textContent" hx-target="#encrypted-data" hx-on::after-request="decrypt()">
+						get drop.
+					</button>
+				</form>
+				<div id="encrypted-data" class="hidden"></div>
+				<textarea disabled class="transition duration-500 font-mono shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-36" id="data" type="text" placeholder="secret data."></textarea>
+				<script>
+          const dropId = window.location.href.split("/").pop()
+          const getDataButton = document.getElementById("getDataButton")
+          getDataButton.setAttribute("hx-get", "/drop/get/" + dropId)
+
+          function decrypt() {
+            const encryptedData = document.getElementById("encrypted-data").innerHTML
+						const keyElement = document.getElementById("key")
+            const key = keyElement.value
+						let data = ""
+						try {
+	            data = sjcl.decrypt(key.trim(), encryptedData)
+						}
+						catch (e) {
+							const data = "error: " + e.message
+							console.error(e)
+							alert("error during decryption. please check the password and try again.")
+							return
+						}
+            document.getElementById("data").innerHTML = data
+
+						keyElement.value = ""
+						document.getElementById("encrypted-data").innerHTML = ""
+						// set visbility hidden for the encrypted data
+						keyElement.classList.add("opacity-0")
+						getDataButton.classList.add("opacity-0")
+						// use transition to show the data
+						document.getElementById("data").classList.add("-translate-y-28")
+          }
+        </script>
+			</div>
+			@components.Footer()
+		</body>
+	</html>
+}
