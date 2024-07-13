@@ -16,19 +16,6 @@ services:
     depends_on:
       - db
 
-  # air:
-  #   image: cosmtrek/air
-  #   working_dir: /app
-  #   ports:
-  #     - 3000:3000
-    # volumes:
-    #   - .:/app
-  #   environment:
-  #     - DB_HOST=db
-  #     - DB_PORT=8080
-  #   depends_on:
-  #     - db
-
   db:
     container_name: db
     image: ghcr.io/tursodatabase/libsql-server:v0.24.17
