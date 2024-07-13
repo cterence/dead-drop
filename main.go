@@ -44,6 +44,16 @@ func main() {
 
 	http.Handle("/", templ.Handler(indexComponent))
 
+	http.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if the database is up.
+		err := db.Ping()
+		if err != nil {
+			http.Error(w, "Database is down", http.StatusInternalServerError)
+			return
+		}
+		w.Write([]byte("OK"))
+	}))
+
 	http.Handle("/drop/put", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Receive the data.
 		r.ParseForm()
