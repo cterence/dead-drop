@@ -1,121 +1,22 @@
+/*
+Copyright © 2024 Térence Chateigné
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package main
 
-import (
-	"crypto/rand"
-	"database/sql"
-	"encoding/base64"
-	"fmt"
-	"net/http"
-	"os"
-
-	"github.com/a-h/templ"
-	"github.com/cterence/dead-drop/views"
-
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
-)
+import "github.com/cterence/dead-drop/cmd"
 
 func main() {
-	// Check if env is development
-	indexComponent := views.Index()
-	dropComponent := views.GetDrop()
-
-	dbHost, isSet := os.LookupEnv("DB_HOST")
-	if !isSet {
-		dbHost = "localhost"
-	}
-	dbPort, isSet := os.LookupEnv("DB_PORT")
-	if !isSet {
-		dbPort = "8080"
-	}
-
-	dbUrl := "http://" + dbHost + ":" + dbPort
-
-	db, err := sql.Open("libsql", dbUrl)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	// Create table drops
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS drops (id TEXT PRIMARY KEY, data TEXT)")
-	if err != nil {
-		panic(err)
-	}
-
-	http.Handle("/", templ.Handler(indexComponent))
-
-	http.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check if the database is up.
-		err := db.Ping()
-		if err != nil {
-			http.Error(w, "Database is down", http.StatusInternalServerError)
-			return
-		}
-		w.Write([]byte("OK"))
-	}))
-
-	http.Handle("/drop/put", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Receive the data.
-		r.ParseForm()
-		data := r.Form.Get("data")
-		// Create random link with the data.
-
-		randomBytes := make([]byte, 32)
-		_, err := rand.Read(randomBytes)
-		if err != nil {
-			panic(err)
-		}
-		randomId := base64.URLEncoding.EncodeToString(randomBytes)[:12]
-
-		// protocol is https if the proxy header is set, otherwise http.
-		protocol := "http://"
-		if r.Header.Get("X-Forwarded-Proto") == "https" {
-			protocol = "https://"
-		}
-
-		host := r.Host
-
-		link := protocol + host + "/get/" + randomId
-		fmt.Println("Link:", link)
-		fmt.Println("Data:", data)
-
-		_, err = db.Exec("INSERT INTO drops (id, data) VALUES (?, ?)", randomId, data)
-		if err != nil {
-			panic(err)
-		}
-
-		// Send the link back to the user.
-		w.Write([]byte(link))
-	}))
-
-	http.Handle("/get/", templ.Handler(dropComponent))
-
-	http.Handle("/drop/get/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Parse the ID from the URL.
-		id := r.URL.Path[len("/drop/get/"):]
-
-		// Get the data from the database.
-		rows, err := db.Query("SELECT data FROM drops WHERE id = ?", id)
-		if err != nil {
-			panic(err)
-		}
-
-		var data string
-		for rows.Next() {
-			err = rows.Scan(&data)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		_, err = db.Exec("DELETE FROM drops WHERE id = ?", id)
-		if err != nil {
-			panic(err)
-		}
-
-		w.Write([]byte(data))
-	}))
-
-	fmt.Println("Listening on :3000")
-	http.ListenAndServe("0.0.0.0:3000", nil)
+	cmd.Execute()
 }
