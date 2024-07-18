@@ -5,8 +5,8 @@ package cmd
 
 import (
 	"database/sql"
-	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -44,37 +44,20 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		// Get all drops
-		rows, err := db.Query("SELECT * FROM drops")
-		if err != nil {
-			slog.Error("Failed to get drops")
-			panic(err)
-		}
-		defer rows.Close()
-
-		// Iterate over all drops
-		for rows.Next() {
-			var drop struct {
-				ID        string
-				Timestamp string
-				Data      string
-			}
-			err := rows.Scan(&drop.ID, &drop.Timestamp, &drop.Data)
-			if err != nil {
-				slog.Error("Failed to scan drop")
-				panic(err)
-			}
-
-			fmt.Printf("Drop ID: %s, Timestamp: %s, Data: %s\n", drop.ID, drop.Timestamp, drop.Data)
-		}
-
 		// Delete all drops with a timestamp older than 24 hours
-		_, err = db.Exec("DELETE FROM drops WHERE timestamp < datetime('now', '-1 day')")
+		res, err := db.Exec("DELETE FROM drops WHERE timestamp < datetime('now', '-1 day')")
 		if err != nil {
 			slog.Error("Failed to purge drops")
 			panic(err)
 		}
-		slog.Info("Drops purged")
+		purgedDropsInt, err := res.RowsAffected()
+		if err != nil {
+			slog.Error("Failed to get the number of purged drops")
+			panic(err)
+		}
+		purgedDrops := strconv.Itoa(int(purgedDropsInt))
+
+		slog.Info("Drops purged: " + purgedDrops)
 	},
 }
 
