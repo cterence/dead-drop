@@ -19,7 +19,6 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -88,7 +87,6 @@ to quickly create a Cobra application.`,
 				w.Write([]byte(`{"status": {"server": "OK", "database": "KO"}}`))
 				slog.Error("Database is down")
 			} else {
-				slog.Info("Database is up")
 				// Write OK to the response as a JSON object.
 				w.Write([]byte(`{"status": {"server": "OK", "database": "OK"}}`))
 			}
@@ -99,6 +97,12 @@ to quickly create a Cobra application.`,
 			r.ParseForm()
 			data := r.Form.Get("data")
 			// Create random link with the data.
+
+			// Enforce a maximum size of 1MB.
+			if len(data) > 1024*1024 {
+				http.Error(w, "Data is too large", http.StatusBadRequest)
+				return
+			}
 
 			randomBytes := make([]byte, 32)
 			_, err := rand.Read(randomBytes)
@@ -116,8 +120,6 @@ to quickly create a Cobra application.`,
 			host := r.Host
 
 			link := protocol + host + "/get/" + randomId
-			fmt.Println("Link:", link)
-			fmt.Println("Data:", data)
 
 			// Save the data to the database.
 			// Database : id, timestamp, data
@@ -125,6 +127,7 @@ to quickly create a Cobra application.`,
 			if err != nil {
 				panic(err)
 			}
+			slog.Info("Storing a drop")
 
 			// Send the link back to the user.
 			w.Write([]byte(link))

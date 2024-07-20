@@ -17,7 +17,7 @@ templ GetDrop() {
 					</button>
 				</form>
 				<div id="encrypted-data" class="hidden"></div>
-				<textarea disabled class="transition duration-500 font-mono shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-36 bg-white" id="data" type="text" placeholder="secret data."></textarea>
+				<textarea disabled class="opacity-0 transition-opacity ease-in duration-500 font-mono shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-36 bg-white" id="data" type="text" placeholder="secret data."></textarea>
 				<script>
           const dropId = window.location.href.split("/").pop()
           const getDataButton = document.getElementById("getDataButton")
@@ -39,13 +39,15 @@ templ GetDrop() {
 						}
             document.getElementById("data").innerHTML = data
 
-						keyElement.value = ""
 						document.getElementById("encrypted-data").innerHTML = ""
 						// set visbility hidden for the encrypted data
 						keyElement.classList.add("opacity-0")
 						getDataButton.classList.add("opacity-0")
 						// use transition to show the data
-						document.getElementById("data").classList.add("-translate-y-28")
+						document.getElementById("data").classList.add("-translate-y-[6.7rem]")
+						setTimeout(() => {
+							document.getElementById("data").classList.remove("opacity-0")
+						}, 500)
           }
         </script>
 			</div>

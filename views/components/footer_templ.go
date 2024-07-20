@@ -26,7 +26,7 @@ func Footer() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"fixed p-1 bottom-0 bg-gray-100 w-full border-t\"><div class=\"md:container md:mx-auto\"><div class=\"text-s text-gray-600 p-4\">data is encrypted client-side using the <a href=\"https://bitwiseshiftleft.github.io/sjcl/\" class=\"text-blue-600 visited:text-purple-600\" target=\"_blank\">scjl</a> cryptographic library.</div><a class=\"rounded-lg p-4 text-s text-blue-600 visited:text-purple-600 text-center\" href=\"https://github.com/cterence/dead-drop\" target=\"_blank\">github.com/cterence/dead-drop</a></div></footer>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"fixed p-1 bottom-0 bg-gray-100 w-full border-t\"><div class=\"md:container md:mx-auto\"><div class=\"text-s text-gray-600 px-4\">your data is encrypted client-side using the <a href=\"https://bitwiseshiftleft.github.io/sjcl/\" class=\"text-blue-600 visited:text-purple-600\" target=\"_blank\">scjl</a> cryptographic library.</div><div class=\"text-s text-gray-600 p-4\">the generated password is never shared with the server (check your network requests for proof).</div><a class=\"rounded-lg p-4 text-s text-blue-600 visited:text-purple-600 text-center\" href=\"https://github.com/cterence/dead-drop\" target=\"_blank\">github.com/cterence/dead-drop</a></div></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
