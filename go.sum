@@ -64,6 +64,8 @@ github.com/tursodatabase/libsql-client-go v0.0.0-20240716195301-2cfb92c10305 h1:
 github.com/tursodatabase/libsql-client-go v0.0.0-20240716195301-2cfb92c10305/go.mod h1:3Y9LlWC05q63NdmViO+2qV22LUjpfYLZWEYfE7ndpmU=
 github.com/tursodatabase/libsql-client-go v0.0.0-20240718143357-9bc6b51d800d h1:osppUr2Bsar2qv9FNrqrCY4zIxpyQtIAV8wFqfo3uDw=
 github.com/tursodatabase/libsql-client-go v0.0.0-20240718143357-9bc6b51d800d/go.mod h1:3Y9LlWC05q63NdmViO+2qV22LUjpfYLZWEYfE7ndpmU=
+github.com/tursodatabase/libsql-client-go v0.0.0-20240723183952-b944339d7e70 h1:G0aOKAhfrB73zLWzSBMHtYH97YTg4A+sXrTMx3UxAOI=
+github.com/tursodatabase/libsql-client-go v0.0.0-20240723183952-b944339d7e70/go.mod h1:3Y9LlWC05q63NdmViO+2qV22LUjpfYLZWEYfE7ndpmU=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=
 go.uber.org/multierr v1.11.0/go.mod h1:20+QtiLqy0Nd6FdQB9TLXag12DsQkrbs3htMFfDN80Y=
 golang.org/x/exp v0.0.0-20240716175740-e3f259677ff7 h1:wDLEX9a7YQoKdKNQt88rtydkqDxeGaBUTnIYc3iG/mA=
