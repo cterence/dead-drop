@@ -19,6 +19,7 @@ templ Index() {
 				</form>
 				<div id="link-wrapper" class="transition-opacity opacity-0 duration-500 flex items-center my-6 text-gray-600 select-none">link: <span id="link" class="truncate select-all shadow appearance-none border rounded w-full py-2 px-3 ml-2 text-gray-700 bg-white leading-tight focus:outline-none focus:shadow-outline"></span></div>
 				<div id="key-wrapper" class="transition-opacity opacity-0 duration-500 flex items-center my-6 text-gray-600 select-none">password: <span id="key" class="truncate select-all shadow appearance-none border rounded w-full py-2 px-3 ml-2 text-gray-700 bg-white leading-tight focus:outline-none focus:shadow-outline"></span></div>
+				<div id="info" class="text-gray-700 transition-opacity opacity-0 duration-500 ">send the link and password to your recipient.</div>
 			</div>
 			<script>
 					function dec2b32(dec) {
@@ -64,14 +65,17 @@ templ Index() {
 						const dataElement = document.getElementById("data")
 						const keyElement = document.getElementById("key-wrapper")
 						const linkElement = document.getElementById("link-wrapper")
+						const infoElement = document.getElementById("info")
 						dataElement.classList.add("opacity-0")
 						document.getElementById("make-drop").classList.add("opacity-0")
 						linkElement.classList.add("-translate-y-[14.8rem]")
 						keyElement.classList.add("-translate-y-[14.8rem]")
+						infoElement.classList.add("-translate-y-[14.8rem]")
 						// timeout to allow the opacity transition to complete
 						setTimeout(() => {
 							linkElement.classList.remove("opacity-0")
 							keyElement.classList.remove("opacity-0")
+							infoElement.classList.remove("opacity-0")
 						}, 500)
 					}
         </script>
