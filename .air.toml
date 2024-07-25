@@ -3,9 +3,9 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-args_bin = ["serve", "--address", "0.0.0.0", "--db-host", "db"]
+args_bin = ["serve"]
 bin = "./tmp/main"
-cmd = "templ generate && CGO_ENABLED=0 go build -o ./tmp/main . && ./tmp/main init --db-host db"
+cmd = "templ generate && CGO_ENABLED=0 go build -o ./tmp/main . && ./tmp/main init"
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
 exclude_file = []

@@ -1,6 +1,7 @@
 services:
-  app:
-    container_name: app
+  app-dev:
+    profiles: ["dev"]
+    container_name: app-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,12 +12,47 @@ services:
     volumes:
       - .:/app
     environment:
-      - DB_HOST=db
-      - DB_PORT=8080
+      - DEAD_DROP_ADDRESS=0.0.0.0
+      - DEAD_DROP_DB_HOST=db
+      - DEAD_DROP_DB_PORT=8080
     depends_on:
       - db
 
+  app-init:
+    profiles: ["prod"]
+    container_name: app-init
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - init
+    restart: no
+    environment:
+      - DEAD_DROP_DB_HOST=db
+      - DEAD_DROP_DB_PORT=8080
+    depends_on:
+      - db
+
+  app:
+    profiles: ["prod"]
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - serve
+    ports:
+      - 3000:3000
+    restart: always
+    environment:
+      - DEAD_DROP_ADDRESS=0.0.0.0
+      - DEAD_DROP_DB_HOST=db
+      - DEAD_DROP_DB_PORT=8080
+    depends_on:
+      - app-init
+
   db:
+    profiles: ["dev", "prod"]
     container_name: db
     image: ghcr.io/tursodatabase/libsql-server:v0.24.17
     ports:
