@@ -54,7 +54,7 @@ services:
   db:
     profiles: ["dev", "prod"]
     container_name: db
-    image: ghcr.io/tursodatabase/libsql-server:v0.24.18
+    image: ghcr.io/tursodatabase/libsql-server:v0.24.19
     ports:
       - 8080:8080
     restart: always
