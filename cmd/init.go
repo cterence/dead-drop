@@ -18,6 +18,7 @@ package cmd
 import (
 	"database/sql"
 	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -37,22 +38,23 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := cmd.Context()
 		dbHost := viper.GetString("db_host")
 		dbPort := viper.GetString("db_port")
 		dbUrl := "http://" + dbHost + ":" + dbPort
 
 		db, err := sql.Open("libsql", dbUrl)
 		if err != nil {
-			slog.Error("Failed to open database connection")
-			panic(err)
+			slog.Error("Failed to open database connection: " + err.Error())
+			os.Exit(1)
 		}
 		defer db.Close()
 
 		// Create table drops
-		_, err = db.Exec("CREATE TABLE IF NOT EXISTS drops (id TEXT PRIMARY KEY, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, data TEXT)")
+		_, err = db.ExecContext(ctx, "CREATE TABLE IF NOT EXISTS drops (id TEXT PRIMARY KEY, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, data TEXT)")
 		if err != nil {
-			slog.Error("Failed to create table drops")
-			panic(err)
+			slog.Error("Failed to create table drops: " + err.Error())
+			os.Exit(1)
 		}
 		slog.Info("Table drops created")
 	},

@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -43,6 +44,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := cmd.Context()
 		dbHost := viper.GetString("db_host")
 		dbPort := viper.GetString("db_port")
 		address := viper.GetString("address")
@@ -56,23 +58,23 @@ to quickly create a Cobra application.`,
 
 		db, err := sql.Open("libsql", dbUrl)
 		if err != nil {
-			slog.Error("Failed to open database connection")
-			panic(err)
+			slog.Error("Failed to open database")
+			os.Exit(1)
 		}
 		defer db.Close()
 
 		// Check if the database is up.
-		_, err = db.Exec("SELECT 1")
+		err = db.PingContext(ctx)
 		if err != nil {
-			slog.Error("Cannot connect to the database")
+			slog.Error("Cannot connect to the database: " + err.Error())
 			return
 		}
 
 		// Check if the table drops exists
-		_, err = db.Exec("SELECT * FROM drops LIMIT 1")
+		_, err = db.ExecContext(ctx, "SELECT * FROM drops LIMIT 1")
 		if err != nil {
-			slog.Error("Table drops does not exist")
-			panic(err)
+			slog.Error("Table drops does not exist: " + err.Error())
+			os.Exit(1)
 		}
 
 		http.Handle("/", templ.Handler(indexComponent))
@@ -81,11 +83,11 @@ to quickly create a Cobra application.`,
 			// Check if the database is up.
 			// db.Ping() does not work for some reason.
 			http.Header.Add(w.Header(), "Content-Type", "application/json")
-			_, err := db.Exec("SELECT 1")
+			err := db.PingContext(ctx)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(`{"status": {"server": "OK", "database": "KO"}}`))
-				slog.Error("Database is down")
+				slog.Error("Database is down: " + err.Error())
 			} else {
 				// Write OK to the response as a JSON object.
 				w.Write([]byte(`{"status": {"server": "OK", "database": "OK"}}`))
@@ -107,7 +109,8 @@ to quickly create a Cobra application.`,
 			randomBytes := make([]byte, 32)
 			_, err := rand.Read(randomBytes)
 			if err != nil {
-				panic(err)
+				slog.Error("Failed to generate random bytes: " + err.Error())
+				os.Exit(1)
 			}
 			randomId := base64.URLEncoding.EncodeToString(randomBytes)[:12]
 
@@ -123,9 +126,10 @@ to quickly create a Cobra application.`,
 
 			// Save the data to the database.
 			// Database : id, timestamp, data
-			_, err = db.Exec("INSERT INTO drops (id, data) VALUES (?, ?)", randomId, data)
+			_, err = db.ExecContext(ctx, "INSERT INTO drops (id, data) VALUES (?, ?)", randomId, data)
 			if err != nil {
-				panic(err)
+				slog.Error("Failed to store a drop: " + err.Error())
+				http.Error(w, "Failed to store the drop", http.StatusInternalServerError)
 			}
 			slog.Info("Storing a drop")
 
@@ -142,20 +146,23 @@ to quickly create a Cobra application.`,
 			// Get the data from the database.
 			rows, err := db.Query("SELECT data FROM drops WHERE id = ?", id)
 			if err != nil {
-				panic(err)
+				slog.Error("Failed to get the drop: " + err.Error())
+				http.Error(w, "Failed to get the drop", http.StatusInternalServerError)
 			}
 
 			var data string
 			for rows.Next() {
 				err = rows.Scan(&data)
 				if err != nil {
-					panic(err)
+					slog.Error("Failed to scan the drop: " + err.Error())
+					http.Error(w, "Failed to scan the drop", http.StatusInternalServerError)
 				}
 			}
 
-			_, err = db.Exec("DELETE FROM drops WHERE id = ?", id)
+			_, err = db.ExecContext(ctx, "DELETE FROM drops WHERE id = ?", id)
 			if err != nil {
-				panic(err)
+				slog.Error("Failed to delete the drop: " + err.Error())
+				http.Error(w, "Failed to delete the drop", http.StatusInternalServerError)
 			}
 
 			w.Write([]byte(data))
@@ -164,8 +171,8 @@ to quickly create a Cobra application.`,
 		slog.Info("Listening on " + address + ":" + port)
 		err = http.ListenAndServe(address+":"+port, nil)
 		if err != nil {
-			slog.Error("Failed to start server")
-			panic(err)
+			slog.Error("Failed to start server: " + err.Error())
+			os.Exit(1)
 		}
 	},
 }

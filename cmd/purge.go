@@ -6,6 +6,7 @@ package cmd
 import (
 	"database/sql"
 	"log/slog"
+	"os"
 	"strconv"
 	"strings"
 
@@ -26,34 +27,35 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := cmd.Context()
 		dbHost := viper.GetString("db_host")
 		dbPort := viper.GetString("db_port")
 		dbUrl := "http://" + dbHost + ":" + dbPort
 
 		db, err := sql.Open("libsql", dbUrl)
 		if err != nil {
-			slog.Error("Failed to open database connection")
-			panic(err)
+			slog.Error("Failed to open database connection: " + err.Error())
+			os.Exit(1)
 		}
 		defer db.Close()
 
 		// Check if the database is up.
-		_, err = db.Exec("SELECT 1")
+		err = db.PingContext(ctx)
 		if err != nil {
-			slog.Error("Cannot connect to the database")
+			slog.Error("Cannot connect to the database: " + err.Error())
 			return
 		}
 
 		// Delete all drops with a timestamp older than 24 hours
-		res, err := db.Exec("DELETE FROM drops WHERE timestamp < datetime('now', '-1 day')")
+		res, err := db.ExecContext(ctx, "DELETE FROM drops WHERE timestamp < datetime('now', '-1 day')")
 		if err != nil {
-			slog.Error("Failed to purge drops")
-			panic(err)
+			slog.Error("Failed to purge drops: " + err.Error())
+			return
 		}
 		purgedDropsInt, err := res.RowsAffected()
 		if err != nil {
-			slog.Error("Failed to get the number of purged drops")
-			panic(err)
+			slog.Error("Failed to get the number of purged drops: " + err.Error())
+			return
 		}
 		purgedDrops := strconv.Itoa(int(purgedDropsInt))
 
