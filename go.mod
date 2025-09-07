@@ -6,7 +6,7 @@ toolchain go1.25.1
 
 require (
 	github.com/a-h/templ v0.3.943
-	github.com/spf13/cobra v1.9.1
+	github.com/spf13/cobra v1.10.1
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.20.1
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
