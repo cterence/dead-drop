@@ -1,4 +1,4 @@
-FROM golang:1.25.1 as fetch-stage
+FROM golang:1.25.2 as fetch-stage
 
 COPY go.mod go.sum /app/
 WORKDIR /app
@@ -17,7 +17,7 @@ EXPOSE 3000
 ENTRYPOINT ["air"]
 
 
-FROM golang:1.25.1 AS build-stage
+FROM golang:1.25.2 AS build-stage
 COPY --from=generate-stage /app /app
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux go build -buildvcs=false -o /app/app
