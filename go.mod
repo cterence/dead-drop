@@ -9,7 +9,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
-	github.com/tursodatabase/libsql-client-go v0.0.0-20251219100830-236aa1ff8acc
+	github.com/tursodatabase/libsql-client-go v0.0.0-20260514053736-a9a8fadfe885
 )
 
 require (
